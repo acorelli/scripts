@@ -1,0 +1,75 @@
+version: '3.8'
+services:
+  {{project_name}}:
+    image: {{project_name}}:{{version_tag}}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - COMPOSE_RUN=true
+    volumes:
+      - {{project_name}}-data:/usr/src/app
+      - ./:/usr/src/app
+      - node_modules:/usr/src/app/node_modules/
+    ports:
+      - "80:80"
+    # Dummy values to make aws-sdk happy when local
+    environment:
+      - AWS_ACCESS_KEY_ID=foo
+      - AWS_SECRET_ACCESS_KEY=bar
+      - AWS_SESSION_TOKEN=dummy
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - S3_ENDPOINT=http://s3mock:9090
+    depends_on:
+      - dynamodb-local
+    networks:
+      - "local"
+      
+  dynamodb-local:
+    build:
+      context: .
+      dockerfile: Dockerfile.dynamodb
+    # Run in shared db mode w/ persistent data storage
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /data"
+    volumes:
+      - dynamodb-data:/data
+    ports:
+      - "8000:8000"
+    networks:
+      - "local"
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    environment:
+      - AWS_ACCESS_KEY_ID=foo
+      - AWS_SECRET_ACCESS_KEY=bar
+      - AWS_SESSION_TOKEN=dummy
+      - DYNAMO_ENDPOINT=http://dynamodb-local:8000
+    ports:
+      - "8001:8001"
+    depends_on:
+      - dynamodb-local
+    networks:
+      - "local"
+
+  s3mock:
+    image: adobe/s3mock
+    environment:
+      - initialBuckets={{comma separated list of bucket names, e.g. bucket1,bucket2,bucket3}}
+      - root=/data
+      - retainFilesOnExit=true
+    volumes:
+      - ./s3mock-data:/data
+    ports:
+      - 9090:9090
+    networks:
+      - "local"
+
+volumes:
+  dynamodb-data:
+  {{project_name}}-data:
+  node_modules:
+  
+networks:
+  local:
+    driver: "bridge"

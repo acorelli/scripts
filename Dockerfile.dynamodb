@@ -1,0 +1,8 @@
+FROM amazon/dynamodb-local
+
+# Switch to root and create the /data directory for persistent db storage
+USER root
+RUN mkdir /data && chown -R dynamodblocal:dynamodblocal /data
+
+# change back from root user
+USER dynamodblocal
