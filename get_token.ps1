@@ -18,10 +18,10 @@ $Headers = @{
 $postParams = '{ "name": "tokenName", "expirationDuration": 90 }'
 #$postParams | write-debug
 
-$tokenInfo = Invoke-RestMethod -Method GET -Uri https://{{jira_url}}/rest/pat/latest/tokens -Headers $Headers
+$tokenInfo = Invoke-RestMethod -Method GET -Uri https://acorelli.atlassian.net/rest/pat/latest/tokens -Headers $Headers
 #$tokenInfo.expiringAt | write-host
 
-#$token = Invoke-WebRequest -Uri https://{{jira_url}}/rest/pat/latest/tokens -Method POST -Headers $Headers -Body $postParams
-$token = Invoke-RestMethod -Method POST -Uri https://{{jira_url}}/rest/pat/latest/tokens -Headers $Headers -Body $postParams
+#$token = Invoke-WebRequest -Uri https://acorelli.atlassian.net/rest/pat/latest/tokens -Method POST -Headers $Headers -Body $postParams
+$token = Invoke-RestMethod -Method POST -Uri https://acorelli.atlassian.net/rest/pat/latest/tokens -Headers $Headers -Body $postParams
 #$token | write-host
 $token.rawToken | write-host

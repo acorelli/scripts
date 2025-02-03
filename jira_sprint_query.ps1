@@ -67,8 +67,12 @@ if($Help){
 if(!$BearerToken){
 	$BearerToken = (Get-Content -Path '~/.jiratoken/token')
 }
+$Text = "jira@acorelli.com:$BearerToken"
+$Bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+$EncodedText = [Convert]::ToBase64String($Bytes)
 $Headers = @{
-	Authorization = "Bearer $BearerToken"
+	"Authorization" = "Basic $EncodedText"
+	"Content-Type"="application/json"
 }
 
 $offset = 0
@@ -77,8 +81,10 @@ if(Test-Path variable:\response){
 }
 $foundFirstActive = $false
 while($response.isLast -ne "True"){
-	$response = Invoke-RestMethod -Method GET -Headers $Headers -Uri "https://{{jira_url}}/rest/agile/1.0/board/{{board_id}}/sprint?startAt=$offset"
+	$response = Invoke-RestMethod -Method GET -Headers $Headers -Uri "https://acorelli.atlassian.net/rest/agile/1.0/board/15/sprint" #?startAt=$offset"
+    $response | Write-Host -ForegroundColor Gray
 	$values = $response.values
+    $values | Write-Host -ForegroundColor Gray
 	$offset = $offset + $values.length
 	for($i = 0; $i -lt $values.length; $i++){
 		$value = $values[$i]
